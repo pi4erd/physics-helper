@@ -1,21 +1,22 @@
 use simcore::proto::ParticleSimulator;
-use visualize::proto::RaylibInstance;
+use visualize::proto::RaylibVisualizer;
+
+#[test]
+fn default_config() {
+    use simcore::proto::Configuration;
+    Configuration::default().save("default.json").unwrap();
+}
 
 fn main() {
-    let mut raylib_instance = RaylibInstance::new();
+    let mut raylib_instance = RaylibVisualizer::new();
 
-    let mut engine = ParticleSimulator::new();
+    let mut engine = ParticleSimulator::load("app-proto/default.json").unwrap();
 
-    while raylib_instance.should_loop() {
+    while raylib_instance.is_looping() {
+        raylib_instance.camera_control();
+
         engine.step();
 
-        let mut draw = raylib_instance.begin_draw();
-        for particle in engine.particle_iter() {
-            visualize::proto::point(
-                &mut draw,
-                particle.position.x as f32,
-                particle.position.y as f32,
-            );
-        }
+        raylib_instance.draw_particles(engine.particles());
     }
 }

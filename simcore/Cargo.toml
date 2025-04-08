@@ -4,5 +4,7 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+visualize = { version = "0.1.0", path = "../visualize" }
 nalgebra = "0.33.2"
-
+serde = { version = "1.0.219", features = ["derive"] }
+serde_json = { version = "1.0.140" }
