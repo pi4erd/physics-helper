@@ -115,7 +115,7 @@ pub mod proto {
             !self.raylib.window_should_close()
         }
 
-        pub fn draw_particles(&mut self, particles: &[ParticleProto<2>]) {
+        pub fn draw_particles(&mut self, particles: &[ParticleProto<2>], time: f64) {
             let mut draw = self.begin_draw(self.camera);
             draw.handle.clear_background(Color::BLACK);
 
@@ -130,18 +130,14 @@ pub mod proto {
                 Position::View(10, 10),
                 &format!("Particle count: {}", particles.len())
             );
-            // draw.text(
-            //     Position::View(10, 50),
-            //     &format!("Kinetic Energy: {}", kinetic_energy)
-            // );
-            // draw.text(
-            //     Position::View(10, 80),
-            //     &format!("Potential Energy: {}", potential_energy)
-            // );
-            // draw.text(
-            //     Position::View(10, 110),
-            //     &format!("Total Energy: {}", kinetic_energy + potential_energy)
-            // );
+            draw.text(
+                Position::View(10, 40),
+                &format!("Current simulation type: Particle")
+            );
+            draw.text(
+                Position::View(10, 70),
+                &format!("Current simulation time: {time}")
+            );
         }
     }
 }
