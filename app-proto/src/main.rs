@@ -20,5 +20,5 @@ fn main() {
 
         raylib_instance.draw_particles(engine.particles());
     }
-    engine.save_statistics("stats.csv").unwrap();
+    engine.save_statistics("stats.json").unwrap();
 }
