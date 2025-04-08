@@ -3,22 +3,21 @@
 
 
 pub mod proto {
+    use std::collections::HashMap;
     // NOTE: nalgebra is not the fastest library but it is accurate
     use nalgebra as na;
-    use visualize::proto::ParticleVisual;
 
-    use crate::{proto::RungeKuttaObject, SimFloat};
+    use crate::{proto::RungeKuttaObject, SimFloat, Property};
+
+    pub type InteractionFn<const N: usize> = fn(
+        p1: &ParticleProto<N>,
+        p2: &ParticleProto<N>,
+        simulation_properties: &HashMap<String, Property>
+    ) -> na::SVector<SimFloat, N>;
 
     pub struct ParticleProto<const N: usize> {
         pub position: na::Point<SimFloat, N>,
         pub velocity: na::SVector<SimFloat, N>,
-    }
-
-    impl<const N: usize> ParticleVisual for ParticleProto<N> {
-        fn position(&self) -> visualize::proto::Position<f32> {
-            // TODO: 2d/3d distinction
-            visualize::proto::Position::World(self.position[0] as f32, self.position[1] as f32)
-        }
     }
 
     impl<const N: usize> ParticleProto<N> {
@@ -27,19 +26,6 @@ pub mod proto {
                 position: na::Point::origin(),
                 velocity: na::SVector::zeros(),
             }
-        }
-
-        // TODO: These must be defined by the user or preset
-        pub fn gravity(&self, other: &ParticleProto<N>, g_const: SimFloat) -> na::SVector<SimFloat, N> {
-            // simulate gravity interaction for prototype
-            let h = other.position - self.position;
-            let dst = h.magnitude();
-            let dir = h / dst;
-
-            // F = Gm1m2/r^2;
-            let force = g_const * dir / (dst * dst);
-
-            force
         }
     }
 

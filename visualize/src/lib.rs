@@ -1,9 +1,6 @@
 pub mod proto {
     use raylib::prelude::*;
-
-    pub trait ParticleVisual {
-        fn position(&self) -> Position<f32>;
-    }
+    use simcore::particle::proto::ParticleProto;
 
     #[derive(Clone, Copy, Debug)]
     pub struct Camera {
@@ -118,18 +115,33 @@ pub mod proto {
             !self.raylib.window_should_close()
         }
 
-        pub fn draw_particles(&mut self, particles: &[impl ParticleVisual]) {
+        pub fn draw_particles(&mut self, particles: &[ParticleProto<2>]) {
             let mut draw = self.begin_draw(self.camera);
             draw.handle.clear_background(Color::BLACK);
 
             for particle in particles.iter() {
-                draw.point(particle.position());
+                draw.point(Position::World(
+                    particle.position.x as f32,
+                    particle.position.y as f32,
+                ));
             }
 
             draw.text(
                 Position::View(10, 10),
                 &format!("Particle count: {}", particles.len())
             );
+            // draw.text(
+            //     Position::View(10, 50),
+            //     &format!("Kinetic Energy: {}", kinetic_energy)
+            // );
+            // draw.text(
+            //     Position::View(10, 80),
+            //     &format!("Potential Energy: {}", potential_energy)
+            // );
+            // draw.text(
+            //     Position::View(10, 110),
+            //     &format!("Total Energy: {}", kinetic_energy + potential_energy)
+            // );
         }
     }
 }
