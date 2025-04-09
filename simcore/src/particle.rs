@@ -1,7 +1,3 @@
-
-
-
-
 pub mod proto {
     use std::collections::HashMap;
     // NOTE: nalgebra is not the fastest library but it is accurate
@@ -18,6 +14,7 @@ pub mod proto {
     pub struct ParticleProto<const N: usize> {
         pub position: na::Point<SimFloat, N>,
         pub velocity: na::SVector<SimFloat, N>,
+        pub additional_properties: HashMap<String, Property>,
     }
 
     impl<const N: usize> ParticleProto<N> {
@@ -25,13 +22,18 @@ pub mod proto {
             Self {
                 position: na::Point::origin(),
                 velocity: na::SVector::zeros(),
+                additional_properties: HashMap::new(),
             }
         }
     }
 
     impl<const N: usize> RungeKuttaObject<N> for ParticleProto<N> {
+        // TODO: Definable
         fn step(&mut self, force: na::SVector<SimFloat, N>, delta: SimFloat) {
-            self.velocity += force * delta;
+            let mass = if let Some(m) = self.additional_properties.get("mass") {
+                m.float()
+            } else { 1.0 };
+            self.velocity += force / mass * delta;
             self.position += self.velocity * delta;
         }
     }

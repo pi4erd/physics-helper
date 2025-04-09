@@ -1,0 +1,25 @@
+{
+  "simulation_config": {
+    "g_const": { "type": "Float", "value": 6.6743e-1 }
+  },
+  "solver_config": {
+    "timestep": 0.01
+  },
+  "initial_objects": [
+    {
+      "position": { "type": "Vector2", "value": [0.0, 0.0] },
+      "velocity": { "type": "Vector2", "value": [0.0, 0.2] },
+      "mass": { "type": "Float", "value": 1.0 }
+    },
+    {
+      "position": { "type": "Vector2", "value": [9.0, 0.0] },
+      "velocity": { "type": "Vector2", "value": [0.0, -0.2] },
+      "mass": { "type": "Float", "value": 4.0 }
+    },
+    {
+      "position": { "type": "Vector2", "value": [-10.0, 0.0] },
+      "velocity": { "type": "Vector2", "value": [0.0, 0.4] },
+      "mass": { "type": "Float", "value": 1.0 }
+    }
+  ]
+}

@@ -14,6 +14,72 @@ pub enum Property {
     Vector4([SimFloat; 4]),
 }
 
+impl Property {
+    /// Unwrap property as Float. Panics if property wasn't Float
+    pub fn float(self) -> SimFloat {
+        match self {
+            Property::Float(v) => v,
+            _ => panic!("Unwrap Float on incompatible value: {:?}", self)
+        }
+    }
+
+    /// Unwrap property as Vector2. Panics if property wasn't Vector2
+    pub fn vec2(self) -> [SimFloat; 2] {
+        match self {
+            Property::Vector2(v) => v,
+            _ => panic!("Unwrap Vector2 on incompatible value: {:?}", self)
+        }
+    }
+
+    /// Unwrap property as Vector3. Panics if property wasn't Vector3
+    pub fn vec3(self) -> [SimFloat; 3] {
+        match self {
+            Property::Vector3(v) => v,
+            _ => panic!("Unwrap Vector3 on incompatible value: {:?}", self)
+        }
+    }
+
+    /// Unwrap property as Vector4. Panics if property wasn't Vector4
+    pub fn vec4(self) -> [SimFloat; 4] {
+        match self {
+            Property::Vector4(v) => v,
+            _ => panic!("Unwrap Vector4 on incompatible value: {:?}", self)
+        }
+    }
+
+    /// Unwrap property as Float. Returns None if property wasn't Float
+    pub fn try_float(self) -> Option<SimFloat> {
+        match self {
+            Property::Float(v) => Some(v),
+            _ => None
+        }
+    }
+
+    /// Unwrap property as Vector2. Returns None if property wasn't Vector2
+    pub fn try_vec2(self) -> Option<[SimFloat; 2]> {
+        match self {
+            Property::Vector2(v) => Some(v),
+            _ => None
+        }
+    }
+
+    /// Unwrap property as Vector3. Returns None if property wasn't Vector3
+    pub fn try_vec3(self) -> Option<[SimFloat; 3]> {
+        match self {
+            Property::Vector3(v) => Some(v),
+            _ => None
+        }
+    }
+
+    /// Unwrap property as Vector4. Returns None if property wasn't Vector4
+    pub fn try_vec4(self) -> Option<[SimFloat; 4]> {
+        match self {
+            Property::Vector4(v) => Some(v),
+            _ => None
+        }
+    }
+}
+
 pub mod proto {
     use std::{collections::HashMap, io::Result as IoResult};
 
@@ -26,11 +92,7 @@ pub mod proto {
         pub timestep: SimFloat,
     }
 
-    #[derive(Clone, Copy, Debug, Serialize, Deserialize)]
-    pub struct ParticleDefinition {
-        position: [f64; 2],
-        velocity: [f64; 2],
-    }
+    pub type ParticleDefinition = HashMap<String, Property>;
 
     #[derive(Clone, Debug, Serialize, Deserialize)]
     pub struct Configuration {
@@ -75,26 +137,30 @@ pub mod proto {
                 solver: RungeKuttaSolver::new(config.solver_config),
                 sim_config: config.simulation_config,
                 objects: config.initial_objects.into_iter()
-                    .map(|p| ParticleProto {
-                        position: p.position.into(),
-                        velocity: p.velocity.into(),
+                    .map(|mut p| ParticleProto {
+                        position: p.remove("position").unwrap().vec2().into(),
+                        velocity: p.remove("velocity").unwrap().vec2().into(),
+                        additional_properties: p,
                     }).collect::<Vec<_>>(),
                 simulation_time: 0.0,
                 
-                // TODO: Define way to implement interaction fn
+                // TODO: Definable
                 interaction_fn: |p1, p2, options| {
                     // simulate gravity interaction for prototype
                     let h = p2.position - p1.position;
                     let dst = h.magnitude();
                     let dir = h / dst;
 
-                    // F = Gm1m2/r^2;
-                    if let Property::Float(g_const) = options["g_const"] {
-                        return g_const * dir / (dst * dst);
-                    } else {
-                        // TODO: better decoding for options by using wrapper type
-                        panic!("Invalid property type for 'g_const'")
-                    }
+                    let m1 = if let Some(m) = p1.additional_properties.get("mass") {
+                        m.float()
+                    } else { 1.0 };
+
+                    let m2 = if let Some(m) = p2.additional_properties.get("mass") {
+                        m.float()
+                    } else { 1.0 };
+
+                    let g_const = options["g_const"].float();
+                    return g_const * m1 * m2 * dir / (dst * dst);
                 },
                 stats: None,
             })
@@ -113,11 +179,8 @@ pub mod proto {
             }
         }
 
-        // TODO: Add a way to define which statistics to record and how
+        // TODO: Definable
         pub fn start_recording_statistics(&mut self) {
-            // Using classical Newtonian physics
-            // Ek = mv^2 / 2 = v^2 / 2, assuming mass is equal
-
             self.stats = Some(Timeseries::new());
         }
 
@@ -133,27 +196,46 @@ pub mod proto {
             &self.objects
         }
 
-        pub fn step(&mut self) {
+        // TODO: Definable
+        fn record_stats(&mut self) {
+            if self.stats.is_none() { return; }
             let particles = self.particles();
-            let mut kinetic_energy = 0.0;
-            for particle in particles {
-                kinetic_energy += particle.velocity.magnitude_squared() / 2.0;
-            }
 
+            // kinetic = mv^2 / 2
+            // potential = -Gm1m2 / r
+            let mut kinetic_energy = 0.0;
             let mut potential_energy = 0.0;
             for (i, x) in particles.iter().enumerate() {
                 for (j, y) in particles.iter().enumerate() {
                     if i == j { continue }
-                    potential_energy += (x.position - y.position).magnitude();
+
+                    let g_const = self.sim_config["g_const"].float();
+
+                    let m1 = if let Some(m) = x.additional_properties.get("mass") {
+                        m.float()
+                    } else { 1.0 };
+
+                    let m2 = if let Some(m) = y.additional_properties.get("mass") {
+                        m.float()
+                    } else { 1.0 };
+
+                    let r = (x.position - y.position).magnitude();
+                    potential_energy -= g_const * m1 * m2 / r;
+
+                    // NOTE: Relative kinetic energy. Can it really be aggregated?
+                    let k = m1 * (x.velocity - y.velocity).magnitude_squared();
+                    kinetic_energy += k;
                 }
             }
 
-            if let Some(stats) = self.stats.as_mut() {
-                let mut hashmap = HashMap::new();
-                hashmap.insert("kinetic_energy".to_string(), Property::Float(kinetic_energy));
-                hashmap.insert("potential_energy".to_string(), Property::Float(potential_energy));
-                stats.record(hashmap);
-            }
+            let mut hashmap = HashMap::new();
+            hashmap.insert("kinetic_energy".to_string(), Property::Float(kinetic_energy));
+            hashmap.insert("potential_energy".to_string(), Property::Float(potential_energy));
+            self.stats.as_mut().unwrap().record(hashmap);
+        }
+
+        pub fn step(&mut self) {
+            self.record_stats();
 
             let mut forces = vec![na::SVector::<SimFloat, 2>::zeros(); self.objects.len()];
             for (i, x) in self.objects.iter().enumerate() {
