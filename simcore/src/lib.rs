@@ -5,77 +5,94 @@ pub mod stats;
 
 pub type SimFloat = f64;
 
-#[derive(Clone, Copy, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(tag = "type", content = "value")]
 pub enum Property {
     Float(SimFloat),
     Vector2([SimFloat; 2]),
     Vector3([SimFloat; 3]),
     Vector4([SimFloat; 4]),
+    String(String),
 }
 
 impl Property {
     /// Unwrap property as Float. Panics if property wasn't Float
-    pub fn float(self) -> SimFloat {
+    pub fn float(&self) -> SimFloat {
         match self {
-            Property::Float(v) => v,
+            Property::Float(v) => *v,
             _ => panic!("Unwrap Float on incompatible value: {:?}", self)
         }
     }
 
     /// Unwrap property as Vector2. Panics if property wasn't Vector2
-    pub fn vec2(self) -> [SimFloat; 2] {
+    pub fn vec2(&self) -> [SimFloat; 2] {
         match self {
-            Property::Vector2(v) => v,
+            Property::Vector2(v) => *v,
             _ => panic!("Unwrap Vector2 on incompatible value: {:?}", self)
         }
     }
 
     /// Unwrap property as Vector3. Panics if property wasn't Vector3
-    pub fn vec3(self) -> [SimFloat; 3] {
+    pub fn vec3(&self) -> [SimFloat; 3] {
         match self {
-            Property::Vector3(v) => v,
+            Property::Vector3(v) => *v,
             _ => panic!("Unwrap Vector3 on incompatible value: {:?}", self)
         }
     }
 
     /// Unwrap property as Vector4. Panics if property wasn't Vector4
-    pub fn vec4(self) -> [SimFloat; 4] {
+    pub fn vec4(&self) -> [SimFloat; 4] {
         match self {
-            Property::Vector4(v) => v,
+            Property::Vector4(v) => *v,
             _ => panic!("Unwrap Vector4 on incompatible value: {:?}", self)
         }
     }
 
-    /// Unwrap property as Float. Returns None if property wasn't Float
-    pub fn try_float(self) -> Option<SimFloat> {
+    /// Unwrap property as String. Panics if property wasn't String
+    pub fn str(&self) -> &str {
         match self {
-            Property::Float(v) => Some(v),
+            Property::String(v) => v,
+            _ => panic!("Unwrap String on incompatible value: {:?}", self),
+        }
+    }
+
+    /// Unwrap property as Float. Returns None if property wasn't Float
+    pub fn try_float(&self) -> Option<SimFloat> {
+        match self {
+            Property::Float(v) => Some(*v),
             _ => None
         }
     }
 
     /// Unwrap property as Vector2. Returns None if property wasn't Vector2
-    pub fn try_vec2(self) -> Option<[SimFloat; 2]> {
+    pub fn try_vec2(&self) -> Option<[SimFloat; 2]> {
         match self {
-            Property::Vector2(v) => Some(v),
+            Property::Vector2(v) => Some(*v),
             _ => None
         }
     }
 
     /// Unwrap property as Vector3. Returns None if property wasn't Vector3
-    pub fn try_vec3(self) -> Option<[SimFloat; 3]> {
+    pub fn try_vec3(&self) -> Option<[SimFloat; 3]> {
         match self {
-            Property::Vector3(v) => Some(v),
+            Property::Vector3(v) => Some(*v),
             _ => None
         }
     }
 
     /// Unwrap property as Vector4. Returns None if property wasn't Vector4
-    pub fn try_vec4(self) -> Option<[SimFloat; 4]> {
+    pub fn try_vec4(&self) -> Option<[SimFloat; 4]> {
         match self {
-            Property::Vector4(v) => Some(v),
+            Property::Vector4(v) => Some(*v),
             _ => None
+        }
+    }
+
+    /// Unwrap property as String. Returns None if property wasn't String
+    pub fn try_str(&self) -> Option<&str> {
+        match self {
+            Property::String(v) => Some(v),
+            _ => None,
         }
     }
 }
@@ -192,6 +209,10 @@ pub mod proto {
             Ok(())
         }
 
+        pub fn sim_name(&self) -> &str {
+            self.sim_config["name"].str()
+        }
+
         pub fn particles(&self) -> &[ParticleProto<2>] {
             &self.objects
         }
@@ -231,9 +252,10 @@ pub mod proto {
             let mut hashmap = HashMap::new();
             hashmap.insert("kinetic_energy".to_string(), Property::Float(kinetic_energy));
             hashmap.insert("potential_energy".to_string(), Property::Float(potential_energy));
-            self.stats.as_mut().unwrap().record(hashmap);
+            self.stats.as_mut().unwrap().record(hashmap, Some(self.simulation_time));
         }
 
+        // Try and experiment with dynamic delta?
         pub fn step(&mut self) {
             self.record_stats();
 

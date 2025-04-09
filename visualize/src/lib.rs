@@ -42,7 +42,7 @@ pub mod proto {
             }
         }
 
-        fn point(&mut self, position: Position<f32>) {
+        fn point(&mut self, position: Position<f32>, radius: f32) {
             match position {
                 Position::View(x, y) => {
                     self.handle.draw_circle_v(Vector2::new(x, y), 10.0, Color::WHITE);
@@ -55,7 +55,7 @@ pub mod proto {
                     self.handle.draw_circle_v(
                         (Vector2::new(x, y) - self.camera.position) / self.camera.zoom
                             + resolution / 2.0,
-                        (2.0 / self.camera.zoom).max(1.0),
+                        (radius / self.camera.zoom).max(1.0),
                         Color::WHITE,
                     );
                 }
@@ -115,15 +115,24 @@ pub mod proto {
             !self.raylib.window_should_close()
         }
 
-        pub fn draw_particles(&mut self, particles: &[ParticleProto<2>], time: f64) {
+        pub fn draw_particles(
+            &mut self,
+            particles: &[ParticleProto<2>],
+            sim_name: &str,
+            time: f64
+        ) {
             let mut draw = self.begin_draw(self.camera);
             draw.handle.clear_background(Color::BLACK);
 
             for particle in particles.iter() {
+                let radius = if let Some(r) = particle.additional_properties.get("radius") {
+                    r.float()
+                } else { 1.0 };
+
                 draw.point(Position::World(
                     particle.position.x as f32,
                     particle.position.y as f32,
-                ));
+                ), radius as f32);
             }
 
             draw.text(
@@ -132,7 +141,7 @@ pub mod proto {
             );
             draw.text(
                 Position::View(10, 40),
-                &format!("Current simulation type: Particle")
+                &format!("Current simulation: {sim_name}")
             );
             draw.text(
                 Position::View(10, 70),

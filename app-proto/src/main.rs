@@ -18,7 +18,7 @@ fn main() {
 
         engine.step();
 
-        raylib_instance.draw_particles(engine.particles(), engine.time());
+        raylib_instance.draw_particles(engine.particles(), engine.sim_name(), engine.time());
     }
     engine.save_statistics("stats.json").unwrap();
 }

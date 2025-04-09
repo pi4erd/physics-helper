@@ -27,9 +27,9 @@ impl<T> Timeseries<T> {
         std::fs::write(filename, serde_json::to_string(&self.series)?)
     }
 
-    pub fn record(&mut self, data: T) {
+    pub fn record(&mut self, data: T, time: Option<f64>) {
         self.series.push(TimedData {
-            time: (Instant::now() - self.start_time).as_secs_f64(),
+            time: time.unwrap_or((Instant::now() - self.start_time).as_secs_f64()),
             data,
         });
     }
