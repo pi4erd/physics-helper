@@ -252,6 +252,16 @@ pub mod proto {
             let mut hashmap = HashMap::new();
             hashmap.insert("kinetic_energy".to_string(), Property::Float(kinetic_energy));
             hashmap.insert("potential_energy".to_string(), Property::Float(potential_energy));
+
+            for (i, obj) in particles.iter().enumerate() {
+                let name = if let Some(name) = obj.additional_properties.get("name") {
+                    name.str().to_string()
+                } else { i.to_string() };
+
+                hashmap.insert(format!("{}_position", name), Property::Vector2(obj.position.into()));
+                hashmap.insert(format!("{}_velocity", name), Property::Vector2(obj.velocity.into()));
+            }
+
             self.stats.as_mut().unwrap().record(hashmap, Some(self.simulation_time));
         }
 

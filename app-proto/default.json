@@ -4,7 +4,7 @@
     "g_const": { "type": "Float", "value": 6.6743e-11 }
   },
   "solver_config": {
-    "timestep": 100000.0
+    "timestep": 1000.0
   },
   "initial_objects": [
     {
@@ -48,13 +48,6 @@
       "velocity": { "type": "Vector2", "value": [0.0, -2.41e4] },
       "mass": { "type": "Float", "value": 6.42e23 },
       "radius": { "type": "Float", "value": 3.396e6 }
-    },
-    {
-      "name": { "type": "String", "value": "Object X" },
-      "position": { "type": "Vector2", "value": [1.0e15, 0.0] },
-      "velocity": { "type": "Vector2", "value": [0.0, 1.0e4] },
-      "mass": { "type": "Float", "value": 1.989e35 },
-      "radius": { "type": "Float", "value": 6.95508e11 }
     }
   ]
 }
