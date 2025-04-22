@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use serde::{Deserialize, Serialize};
 
 pub mod particle;
@@ -13,6 +15,7 @@ pub enum Property {
     Vector3([SimFloat; 3]),
     Vector4([SimFloat; 4]),
     String(String),
+    Nested(HashMap<String, Property>),
 }
 
 impl Property {
@@ -56,6 +59,14 @@ impl Property {
         }
     }
 
+    /// Unwrap property as Nested. Panics if property wasn't Nested
+    pub fn nested(&self) -> &HashMap<String, Property> {
+        match self {
+            Property::Nested(n) => n,
+            _ => panic!("Unwrap Nested on incompatible value: {:?}", self),
+        }
+    }
+
     /// Unwrap property as Float. Returns None if property wasn't Float
     pub fn try_float(&self) -> Option<SimFloat> {
         match self {
@@ -92,6 +103,14 @@ impl Property {
     pub fn try_str(&self) -> Option<&str> {
         match self {
             Property::String(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    /// Unwrap property as Nested. Returns None if property wasn't Nested
+    pub fn try_nested(&self) -> Option<&HashMap<String, Property>> {
+        match self {
+            Property::Nested(n) => Some(n),
             _ => None,
         }
     }
@@ -258,8 +277,11 @@ pub mod proto {
                     name.str().to_string()
                 } else { i.to_string() };
 
-                hashmap.insert(format!("{}_position", name), Property::Vector2(obj.position.into()));
-                hashmap.insert(format!("{}_velocity", name), Property::Vector2(obj.velocity.into()));
+                let mut obj_props = HashMap::new();
+                obj_props.insert("position".to_string(), Property::Vector2(obj.position.into()));
+                obj_props.insert("velocity".to_string(), Property::Vector2(obj.position.into()));
+
+                hashmap.insert(format!("{}", name), Property::Nested(obj_props));
             }
 
             self.stats.as_mut().unwrap().record(hashmap, Some(self.simulation_time));
