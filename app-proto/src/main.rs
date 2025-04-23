@@ -23,7 +23,7 @@ fn main() {
     let config_file = rfd::FileDialog::new()
         .add_filter("json", &["json"])
         .set_title("Select configuration file")
-        .set_directory("/")
+        .set_directory("~")
         .pick_file();
 
     let config_file = if let Some(c) = config_file { c } else {
@@ -53,7 +53,22 @@ fn main() {
 
         raylib_instance.draw_particles(engine.particles(), engine.sim_name(), engine.time());
     }
-    match engine.save_statistics("stats.json") {
+
+    let stats_file = rfd::FileDialog::new()
+        .add_filter("json", &["json"])
+        .set_title("Select configuration file")
+        .set_directory("~")
+        .save_file();
+
+    let stats_file = if let Some(s) = stats_file { s } else {
+        eprintln!("No save file for statistics provided. Skipping.");
+        return;
+    };
+
+    let stats_file = stats_file.to_str()
+        .expect("Unable to parse config path as utf-8 string");
+
+    match engine.save_statistics(stats_file) {
         Ok(_) => {},
         Err(e) => {
             throw_error(
