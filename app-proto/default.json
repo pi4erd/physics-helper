@@ -1,53 +1,25 @@
 {
   "simulation_config": {
-    "name": { "type": "String", "value": "Solar system" },
-    "g_const": { "type": "Float", "value": 6.6743e-11 }
+    "name": "Solar system",
+    "g_const": 6.6743e-11
   },
   "solver_config": {
-    "timestep": 1000.0
+    "timestep": 100.0
   },
   "initial_objects": [
     {
-      "name": { "type": "String", "value": "Sun" },
-      "position": { "type": "Vector2", "value": [0.0, 0.0] },
-      "velocity": { "type": "Vector2", "value": [0.0, 0.0] },
-      "mass": { "type": "Float", "value": 1.989e30 },
-      "radius": { "type": "Float", "value": 6.95508e8 }
+      "name": "Sun",
+      "position": [0.0, 0.0],
+      "velocity": [0.0, 0.0],
+      "mass": 1.989e30,
+      "radius": 6.95508e8
     },
     {
-      "name": { "type": "String", "value": "Mercury" },
-      "position": { "type": "Vector2", "value": [5.79e10, 0.0] },
-      "velocity": { "type": "Vector2", "value": [0.0, -4.74e4] },
-      "mass": { "type": "Float", "value": 3.3e23 },
-      "radius": { "type": "Float", "value": 2.4395e6 }
-    },
-    {
-      "name": { "type": "String", "value": "Venus" },
-      "position": { "type": "Vector2", "value": [1.082e11, 0.0] },
-      "velocity": { "type": "Vector2", "value": [0.0, 3.5e4] },
-      "mass": { "type": "Float", "value": 4.87e24 },
-      "radius": { "type": "Float", "value": 6.052e6 }
-    },
-    {
-      "name": { "type": "String", "value": "Earth" },
-      "position": { "type": "Vector2", "value": [1.496e11, 0.0] },
-      "velocity": { "type": "Vector2", "value": [0.0, -2.98e4] },
-      "mass": { "type": "Float", "value": 5.97e24 },
-      "radius": { "type": "Float", "value": 6.878e6 }
-    },
-    {
-      "name": { "type": "String", "value": "Moon" },
-      "position": { "type": "Vector2", "value": [1.49984e11, 0.0] },
-      "velocity": { "type": "Vector2", "value": [0.0, -3.08e4] },
-      "mass": { "type": "Float", "value": 7.3e22 },
-      "radius": { "type": "Float", "value": 1.7375e6 }
-    },
-    {
-      "name": { "type": "String", "value": "Mars" },
-      "position": { "type": "Vector2", "value": [2.28e11, 0.0] },
-      "velocity": { "type": "Vector2", "value": [0.0, -2.41e4] },
-      "mass": { "type": "Float", "value": 6.42e23 },
-      "radius": { "type": "Float", "value": 3.396e6 }
+      "name": "Cool other thing",
+      "position": [3.0e10, 0.0],
+      "velocity": [0.0, 1.0e5],
+      "mass": 1.989e30,
+      "radius": 6.95508e8
     }
   ]
 }

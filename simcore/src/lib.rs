@@ -8,7 +8,7 @@ pub mod stats;
 pub type SimFloat = f64;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
-#[serde(tag = "type", content = "value")]
+#[serde(untagged)]
 pub enum Property {
     Float(SimFloat),
     Vector2([SimFloat; 2]),
