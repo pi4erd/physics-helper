@@ -3,7 +3,7 @@ pub mod proto {
     // NOTE: nalgebra is not the fastest library but it is accurate
     use nalgebra as na;
 
-    use crate::{proto::RungeKuttaObject, SimFloat, Property};
+    use crate::{proto::EulerMethodObject, SimFloat, Property};
 
     pub type InteractionFn<const N: usize> = fn(
         p1: &ParticleProto<N>,
@@ -27,7 +27,7 @@ pub mod proto {
         }
     }
 
-    impl<const N: usize> RungeKuttaObject<N> for ParticleProto<N> {
+    impl<const N: usize> EulerMethodObject<N> for ParticleProto<N> {
         // TODO: Definable
         fn step(&mut self, force: na::SVector<SimFloat, N>, delta: SimFloat) {
             let mass = if let Some(m) = self.additional_properties.get("mass") {

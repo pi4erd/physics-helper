@@ -124,7 +124,7 @@ pub mod proto {
     use serde::{Deserialize, Serialize};
 
     #[derive(Clone, Copy, Debug, Serialize, Deserialize)]
-    pub struct RungeKuttaSolverConfig {
+    pub struct EulerMethodSolverConfig {
         pub timestep: SimFloat,
     }
 
@@ -133,7 +133,7 @@ pub mod proto {
     #[derive(Clone, Debug, Serialize, Deserialize)]
     pub struct Configuration {
         simulation_config: HashMap<String, Property>,
-        solver_config: RungeKuttaSolverConfig,
+        solver_config: EulerMethodSolverConfig,
         initial_objects: Vec<ParticleDefinition>,
     }
 
@@ -149,14 +149,14 @@ pub mod proto {
         fn default() -> Self {
             Self {
                 simulation_config: HashMap::new(),
-                solver_config: RungeKuttaSolverConfig { timestep: 0.02 },
+                solver_config: EulerMethodSolverConfig { timestep: 0.02 },
                 initial_objects: vec![]
             }
         }
     }
 
     pub struct ParticleSimulator {
-        solver: RungeKuttaSolver,
+        solver: EulerMethodSolver,
         sim_config: HashMap<String, Property>,
         objects: Vec<ParticleProto<2>>,
         simulation_time: SimFloat,
@@ -170,7 +170,7 @@ pub mod proto {
             let config: Configuration = serde_json::from_str(&file)?;
 
             Ok(Self {
-                solver: RungeKuttaSolver::new(config.solver_config),
+                solver: EulerMethodSolver::new(config.solver_config),
                 sim_config: config.simulation_config,
                 objects: config.initial_objects.into_iter()
                     .map(|mut p| ParticleProto {
@@ -204,8 +204,8 @@ pub mod proto {
 
         pub fn new() -> Self {
             Self {
-                solver: RungeKuttaSolver::new(
-                    RungeKuttaSolverConfig { timestep: 0.02 },
+                solver: EulerMethodSolver::new(
+                    EulerMethodSolverConfig { timestep: 0.02 },
                 ),
                 sim_config: HashMap::new(),
                 objects: vec![],
@@ -310,13 +310,13 @@ pub mod proto {
         }
     }
 
-    pub struct RungeKuttaSolver {
-        config: RungeKuttaSolverConfig,
+    pub struct EulerMethodSolver {
+        config: EulerMethodSolverConfig,
     }
 
-    impl RungeKuttaSolver {
+    impl EulerMethodSolver {
         pub fn new(
-            config: RungeKuttaSolverConfig,
+            config: EulerMethodSolverConfig,
         ) -> Self {
             Self {
                 config,
@@ -331,14 +331,14 @@ pub mod proto {
             &self,
             objects: &mut [TObj],
             forces: &[na::SVector<SimFloat, N>]
-        ) where TObj: RungeKuttaObject<N> {
+        ) where TObj: EulerMethodObject<N> {
             for (obj, force) in std::iter::zip(objects.iter_mut(), forces.iter()) {
                 obj.step(force.clone(), self.config.timestep);
             }
         }
     }
 
-    pub trait RungeKuttaObject<const N: usize> {
+    pub trait EulerMethodObject<const N: usize> {
         fn step(&mut self, force: na::SVector<SimFloat, N>, delta: SimFloat);
     }
 }
