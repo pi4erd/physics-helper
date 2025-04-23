@@ -7,6 +7,15 @@ fn default_config() {
     Configuration::default().save("default.json").unwrap();
 }
 
+fn throw_error(title: &str, message: &str) {
+    rfd::MessageDialog::new()
+        .set_level(rfd::MessageLevel::Error)
+        .set_title(title)
+        .set_description(message)
+        .set_buttons(rfd::MessageButtons::Ok)
+        .show();
+}
+
 fn main() {
     let mut raylib_instance = RaylibVisualizer::new();
 
@@ -28,7 +37,10 @@ fn main() {
     let mut engine = match ParticleSimulator::load(config_file) {
         Ok(v) => v,
         Err(e) => {
-            eprintln!("Error occured while loading configuration: {e}");
+            throw_error(
+                "Unable to load configuration",
+                &format!("Error occured while loading configuration: {e}")
+            );
             return;
         }
     };
@@ -41,5 +53,13 @@ fn main() {
 
         raylib_instance.draw_particles(engine.particles(), engine.sim_name(), engine.time());
     }
-    engine.save_statistics("stats.json").unwrap();
+    match engine.save_statistics("stats.json") {
+        Ok(_) => {},
+        Err(e) => {
+            throw_error(
+                "Failed to save statistics",
+                &format!("Error occured while saving statistics: {e}")
+            );
+        }
+    };
 }
