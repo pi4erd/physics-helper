@@ -215,6 +215,12 @@ pub mod proto {
             }
         }
 
+        fn compute_error(&self) -> SimFloat {
+            const ERROR_RATIO: SimFloat = SimFloat::EPSILON;
+
+            ERROR_RATIO * self.objects.iter().fold(0.0, |a, p| a + p.velocity.magnitude())
+        }
+
         // TODO: Definable
         pub fn start_recording_statistics(&mut self) {
             self.stats = Some(Timeseries::new());
@@ -283,6 +289,8 @@ pub mod proto {
 
                 hashmap.insert(format!("{}", name), Property::Nested(obj_props));
             }
+
+            hashmap.insert("estimated_error".to_string(), Property::Float(self.compute_error()));
 
             self.stats.as_mut().unwrap().record(hashmap, Some(self.simulation_time));
         }
