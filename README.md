@@ -21,3 +21,7 @@ In the future, I plan to add:
  - Complete customizability - you will be able to customize your simulation
    starting from what properties particles have, ending with fundamental interactions
    between these particles. (and of course the same goes for field simulations)
+   
+## License
+
+See [LICENSE](https://github.com/pi4erd/physics-helper/blob/main/LICENSE).
