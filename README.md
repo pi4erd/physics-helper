@@ -3,6 +3,13 @@
 **physics-helper** is a tool for creating and customizing physics simulations.
 This project is part of my university degree.
 
+## !! Archival notice !!
+
+This project is archived and will not be maintained.
+
+Reason: The problem this project is trying to solve is very niche and
+pretty much invented. Unless a real interest appears, this project will not be reopened.
+
 ## Features
 
 The **physics-helper** contains several engines that simplify creaton and interaction for simulations:
